@@ -10,11 +10,11 @@ public class Node {
 
   public float size;
   public PVector position =  new PVector(0, 0, 0);
-  public int colour;
+  public color colour;
   
   ArrayList<Edge> edges = new ArrayList<Edge>();
 
-  Node(int id, String label, float size, PVector position, int colour, float ecce, float closeness, float between, float modclass) {
+  Node(int id, String label, float size, PVector position, color colour, float ecce, float closeness, float between, float modclass) {
 
     this.id = id;
     this.label = label;
@@ -29,9 +29,9 @@ public class Node {
     this.modclass = modclass;
   }
   
-  public addEdge(int source, int target, float weight){
-    if (this.id = source){
-      edges.add(new Edge(source, target, weight));
+  public void addEdge(int id, int source, int target, float weight){
+    if (this.id == source){
+      edges.add(new Edge(id, source, target, weight));
     }
   }
 }
