@@ -15,7 +15,7 @@ public void setup(){
     cam = new PeasyCam(this, 1000);
     cam.setWheelScale(2.0);
   
-    size(2000, 1500, P3D);
+    size(1280, 800, P3D);
     smooth();
   
     graph = new HashMap<Integer, Node>();
@@ -127,12 +127,12 @@ public void keyReleased() {
     
     case'W':
     case'w':
-      camDistance += 10;
+ 
     break;
     
     case'S':
     case's':
-      camDistance = 10;
+ 
     break;
   }
   
