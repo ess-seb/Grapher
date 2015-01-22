@@ -3,10 +3,10 @@ public class Node {
   public int id;
   public String label;
 
-  public float ecce; //?
-  public float closeness; //? 
-  public float between; //?
-  public float modclass; //?
+  public float ecce;
+  public float closeness;
+  public float between;
+  public float modclass;
 
   public float size;
   public PVector position =  new PVector(0, 0, 0);

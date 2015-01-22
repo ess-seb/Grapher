@@ -6,8 +6,6 @@ import peasy.*;
 
 
 PeasyCam cam;
-double camDistance = 1000;
-int[] tabWeight = {5,10,20,30,50,70, 80,90};
 
 HashMap<Integer, Node> graph;
 
@@ -16,10 +14,8 @@ public void setup(){
   
     cam = new PeasyCam(this, 1000);
     cam.setWheelScale(2.0);
-    //cam.setMinimumDistance(0);
-    //cam.setMaximumDistance(500000);
   
-    size(1280, 800, P3D);
+    size(2000, 1500, P3D);
     smooth();
   
     graph = new HashMap<Integer, Node>();
@@ -103,9 +99,6 @@ public void draw() {
     n = graph.get(id);
     
     for(Edge edgeFrom: n.edgesFromThis){
-      switch(width){
-      case 0:
-      }
       strokeWeight(map(edgeFrom.weight, 0, 13, 10, 50));
       stroke(255, map(edgeFrom.weight, 0, 13, 20, 255));  
       line(n.position.x, n.position.y, n.position.z,
