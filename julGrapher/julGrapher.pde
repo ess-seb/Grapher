@@ -2,11 +2,25 @@ import javax.swing.*;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.*;
 import javax.swing.filechooser.FileFilter;
+import peasy.*;
+
+
+PeasyCam cam;
+double camDistance = 1000;
+int[] tabWeight = {5,10,20,30,50,70, 80,90};
 
 HashMap<Integer, Node> graph;
 
+
 public void setup(){
-  // size(1280, 800, P3D);
+  
+    cam = new PeasyCam(this, 1000);
+    cam.setWheelScale(2.0);
+    //cam.setMinimumDistance(0);
+    //cam.setMaximumDistance(500000);
+  
+    size(1280, 800, P3D);
+    smooth();
   
     graph = new HashMap<Integer, Node>();
     
@@ -68,25 +82,46 @@ public void setup(){
       
       println(id + " " + source + " " + target + " " + weight);
       
-      Edge myEdge = new Edge(id, source, target, weight);
+      Edge myEdge = new Edge(id, graph.get(source), graph.get(target), weight);
       graph.get(source).addEdge(myEdge);
       graph.get(target).addEdge(myEdge);
     }
     Node n = graph.get(33); //for debuging
-    println(graph.get(121).edgesFromThis.get(1).target + " = 18006");
-    println(graph.get(121).edgesToThis.get(1).source + " = 2064");
+    println(graph.get(121).edgesFromThis.get(1).target.id + " = 18006");
+    println(graph.get(121).edgesToThis.get(1).source.id + " = 2064");
     println("LOADING COMPLETE"); //<>//
 }
   
   
-public void draw(){
+public void draw() {
+  background(0);
+  fill(255);
+  scale(0.1);
+  
+  for(Integer id: graph.keySet()) {
+    Node n = null;
+    n = graph.get(id);
+    
+    for(Edge edgeFrom: n.edgesFromThis){
+      switch(width){
+      case 0:
+      }
+      strokeWeight(map(edgeFrom.weight, 0, 13, 10, 50));
+      stroke(255, map(edgeFrom.weight, 0, 13, 20, 255));  
+      line(n.position.x, n.position.y, n.position.z,
+           edgeFrom.target.position.x, edgeFrom.target.position.y, edgeFrom.target.position.z);
+    }
+    
+    noStroke();
+    pushMatrix();
+    translate(n.position.x, n.position.y, n.position.z); 
+    box(200);  // Black rectangle
+    popMatrix();
     
     
+  }
 } //<>//
-
-
  //<>//
-
 
 public void keyReleased() {
   switch(key){         
@@ -95,6 +130,16 @@ public void keyReleased() {
       String flName = getFile("Load XML");
       println("LOADING COMPLETE:");
       XML xmlLoaded = new XML(flName);
+    break;
+    
+    case'W':
+    case'w':
+      camDistance += 10;
+    break;
+    
+    case'S':
+    case's':
+      camDistance = 10;
     break;
   }
   
