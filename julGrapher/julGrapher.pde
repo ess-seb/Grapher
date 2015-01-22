@@ -67,70 +67,39 @@ public void setup(){
       }
       
       println(id + " " + source + " " + target + " " + weight);
-      graph.get(source).addEdge(id, source, target, weight);
+      
+      Edge myEdge = new Edge(id, source, target, weight);
+      graph.get(source).addEdge(myEdge);
+      graph.get(target).addEdge(myEdge);
     }
-    Node n = print(graph.get(33).edges(;
+    Node n = graph.get(33); //for debuging
+    println(graph.get(121).edgesFromThis.get(1).target + " = 18006");
+    println(graph.get(121).edgesToThis.get(1).source + " = 2064");
     println("LOADING COMPLETE"); //<>//
 }
   
   
 public void draw(){
     
-     //<>//
-}
+    
+} //<>//
+
 
  //<>//
 
 
-
 public void keyReleased() {
   switch(key){         
+    case'l':
     case'L':
-//       String flName = getFile("Load XML");
-//       println("LOADING COMPLETE:");
-//       XML xmlLoaded = new XML(flName);
-         XML xmlLoaded = new XML("rozm.xml");
-         open("krozm.xml");
-      println(xmlLoaded);
-       println(xmlLoaded.getChildCount());
-       // println(xmlLoaded.getChild(0));
-       // for (int xl=0; xl<xmlLoaded.getChildCount(); xl++)
-       //  {
-       //    println("layer " + xl + ": " + xmlLoaded.getChild(xl).getChildCount() + " distorters");
-       //    for (int xd=0; xd<xmlLoaded.getChild(xl).getChildCount(); xd++)
-       //    {
-       //      float dist_x = xmlLoaded.getChild(xl).getChild(xd).getFloat("x");
-       //      float dist_y = xmlLoaded.getChild(xl).getChild(xd).getFloat("y");
-       //      float dist_z = xmlLoaded.getChild(xl).getChild(xd).getFloat("z");       
-       //      float dist_fA = xmlLoaded.getChild(xl).getChild(xd).getFloat("forceA");
-       //      float dist_fB = xmlLoaded.getChild(xl).getChild(xd).getFloat("forceB");
-            
-       //      layers[xl].addDistorter(dist_x, dist_y, dist_z, dist_fA, dist_fB);
-       //      //layers[xl].addDistorter();
-       //    }
-       //  }
+      String flName = getFile("Load XML");
+      println("LOADING COMPLETE:");
+      XML xmlLoaded = new XML(flName);
     break;
   }
   
 }
 
-
-  // for (int i = 0; i < children.length; i ++ ) {
-    
-  //   // The diameter is child 0
-  //   XMLElement diameterElement = children[i].getChild(0);
-    
-  //   // The diameter is the content of the first element while red and green are attributes of the second.
-  //   int diameter = int(diameterElement.getContent());
-    
-  //   // Color is child 1
-  //   XMLElement colorElement = children[i].getChild(1);
-  //   int r = colorElement.getIntAttribute("red");
-  //   int g = colorElement.getIntAttribute("green");
-    
-  //   // Make a new Bubble object with values from XML document
-  //   bubbles[i] = new Bubble(r,g,diameter);
-  // }
   
 String getFile(String dialogTxt) {
     String fName = "";
@@ -143,9 +112,10 @@ String getFile(String dialogTxt) {
       println("PATH: "+fName);
     }
     return fName;
-  }
+}
   
-boolean hasChild(XML myXml, String myKey){
+  
+boolean hasChild(XML myXml, String myKey) {
   boolean has = false;
   for(String tempKey: myXml.listChildren()){
     if (tempKey == myKey){
