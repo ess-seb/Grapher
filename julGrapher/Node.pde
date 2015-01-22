@@ -31,10 +31,10 @@ public class Node {
   }
   
   public void addEdge(Edge myEdge){
-    if (this.id == myEdge.source){
+    if (this.id == myEdge.source.id){
       edgesFromThis.add(myEdge);
     }
-    else if (this.id == myEdge.target){
+    else if (this.id == myEdge.target.id){
       edgesToThis.add(myEdge);
     }
   }

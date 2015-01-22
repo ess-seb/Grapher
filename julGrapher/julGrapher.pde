@@ -115,14 +115,14 @@ public void draw() {
     noStroke();
     pushMatrix();
     translate(n.position.x, n.position.y, n.position.z); 
-    box(200);  // Black rectangle
+    box(200);
     popMatrix();
     
     
   }
 } //<>//
- //<>//
 
+ //<>//
 public void keyReleased() {
   switch(key){         
     case'l':
