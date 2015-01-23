@@ -1,3 +1,13 @@
+/*
+change: visual style
+add: nodes' sizes depend on sum of their edges weight
+add: multi graphs space
+add: navigation by WSAD and X keys
+fix: scale problem
+add: active graph and Node (refs) bye WSAD
+
+*/
+
 import javax.swing.*;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.*;
@@ -6,117 +16,72 @@ import peasy.*;
 
 
 PeasyCam cam;
-
-HashMap<Integer, Node> graph;
-
+ArrayList<Graph> graphs = new ArrayList<Graph>();
+Graph activeGraphRef;
+Object activeNodeRef;
+int activeGraph = 0;
+int activeNode = 0;
 
 public void setup(){
-  
+    hint (ENABLE_STROKE_PURE);
     cam = new PeasyCam(this, 1000);
     cam.setWheelScale(2.0);
   
     size(1280, 800, P3D);
     smooth();
-  
-    graph = new HashMap<Integer, Node>();
+    scale(0.1);
     
     XML xml = loadXML("rozm.xml");
+    for (int ig=0; ig<5; ig++){
+      graphs.add(new Graph(xml));
+    } //<>//
     
-    
-    XML[] nodes = xml.getChild("graph").getChild("nodes").getChildren("node");
-    println("Nodes: " + nodes.length);
-    for(XML node: nodes){
-      int id = node.getInt("id");
-      String label = node.getString("label");
-      
-      float size = node.getChild("viz:size").getFloat("value");
-      float posX = node.getChild("viz:position").getFloat("x");
-      float posY = node.getChild("viz:position").getFloat("y");
-      float posZ = node.getChild("viz:position").getFloat("z");
-      
-      PVector position = new PVector(posX, posY, posZ);
-      
-      int colR = 0, colG = 0, colB = 0;
-      if (hasChild(node, "viz:color")){
-        colR = node.getChild("viz:color").getInt("r");
-        colG = node.getChild("viz:color").getInt("g");
-        colB = node.getChild("viz:color").getInt("b");
-      }
-      color colour = color(colR, colG, colB);
-  
-      float ecce = node.getChild("attvalues").getChild(0).getFloat("value");
-      float closeness = node.getChild("attvalues").getChild(1).getFloat("value");
-      float between = node.getChild("attvalues").getChild(2).getFloat("value");
-      float modclass = node.getChild("attvalues").getChild(3).getFloat("value");
-      
-      println(id + " " + label + " " + size + " " + position + " " + colour + " " + ecce + " " + closeness + " " + between + " " + modclass);
-      graph.put(id, new Node(id, label, size, position, colour, ecce, closeness, between, modclass));
-      
-    }
-    
-    XML[] edges = xml.getChild("graph").getChild("edges").getChildren("edge");
-    println("\n\nEdges: " + edges.length);
-    
-    for(XML edge: edges){
-      
-      int id;
-      if (edge.hasAttribute("id")){
-        id = edge.getInt("id");
-      } else {
-        id = 0;
-      }
-      
-      int source = edge.getInt("source");
-      int target = edge.getInt("target");
-      
-      float weight;
-      if (edge.hasAttribute("weight")){
-        weight = edge.getFloat("weight");
-      } else {
-        weight = 0.0;
-      }
-      
-      println(id + " " + source + " " + target + " " + weight);
-      
-      Edge myEdge = new Edge(id, graph.get(source), graph.get(target), weight);
-      graph.get(source).addEdge(myEdge);
-      graph.get(target).addEdge(myEdge);
-    }
-    Node n = graph.get(33); //for debuging
-    println(graph.get(121).edgesFromThis.get(1).target.id + " = 18006");
-    println(graph.get(121).edgesToThis.get(1).source.id + " = 2064");
-    println("LOADING COMPLETE"); //<>//
 }
   
   
 public void draw() {
-  background(0);
+  background(190);
   fill(255);
-  scale(0.1);
+  // scale(0.1);
   
-  for(Integer id: graph.keySet()) {
-    Node n = null;
-    n = graph.get(id);
-    
-    for(Edge edgeFrom: n.edgesFromThis){
-      strokeWeight(map(edgeFrom.weight, 0, 13, 10, 50));
-      stroke(255, map(edgeFrom.weight, 0, 13, 20, 255));  
-      line(n.position.x, n.position.y, n.position.z,
-           edgeFrom.target.position.x, edgeFrom.target.position.y, edgeFrom.target.position.z);
-    }
-    
-    noStroke();
+  for(Graph graph: graphs){
     pushMatrix();
-    translate(n.position.x, n.position.y, n.position.z); 
-    box(200);
+    translate(graph.position.x, graph.position.y, graph.position.z);
+    for(Integer id: graph.nodes.keySet()) {
+      Node n = null;
+      n = graph.nodes.get(id);
+      
+      for(Edge edgeFrom: n.edgesFromThis){
+        strokeWeight(map(edgeFrom.weight, 0, 13, 1, 8));
+        stroke(0, map(edgeFrom.weight, 0, 11, 20, 255));  
+        line(n.position.x, n.position.y, n.position.z,
+             edgeFrom.target.position.x, edgeFrom.target.position.y, edgeFrom.target.position.z);
+      }
+      
+      noStroke();
+      pushMatrix();
+      translate(n.position.x, n.position.y, n.position.z);
+      
+      // int size = n.edgesFromThis.size() + n.edgesToThis.size();
+      int size = 0;
+      for(Edge e: n.edgesFromThis){
+        size += e.weight;
+      }
+      for(Edge e: n.edgesToThis){
+        size += e.weight;
+      }
+      
+      box(map(size, 0, 50, 10, 50));
+      popMatrix();
+      
+      
+    }
     popMatrix();
-    
-    
   }
 } //<>//
 
- //<>//
-public void keyReleased() {
+
+public void keyReleased() { //<>//
   switch(key){         
     case'l':
     case'L':
@@ -125,19 +90,59 @@ public void keyReleased() {
       XML xmlLoaded = new XML(flName);
     break;
     
+    case'A':
+    case'a':
+     activeNode--;
+     if (activeNode < 0){
+       activeNode = graphs.get(activeGraph).nodes.size()-1;
+     }
+     println("aN: " + activeNode + " ");
+     activeNodeRef = activeGraphRef.nodes.keySet().toArray()[activeNode];
+     lookAtPV(PVector.add(activeGraphRef.position, activeGraphRef.nodes.get(activeNodeRef).position), 300);
+    break;
+    
+    case'D':
+    case'd':
+     activeNode++;
+     if (activeNode >= graphs.get(activeGraph).nodes.size()){
+       activeNode = 0;
+     }
+     activeNodeRef = activeGraphRef.nodes.keySet().toArray()[activeNode];
+     lookAtPV(PVector.add(activeGraphRef.position, activeGraphRef.nodes.get(activeNodeRef).position), 300);
+    break;
+    
     case'W':
     case'w':
- 
+     activeGraph++;
+     if (activeGraph >= graphs.size()){
+       activeGraph = 0;
+     }
+     activeNode = -1;
+     activeGraphRef = graphs.get(activeGraph);
+     lookAtPV(activeGraphRef.position, 2000);
     break;
     
     case'S':
     case's':
- 
+      activeGraph--;
+     if (activeGraph < 0){
+       activeGraph = 0;
+     }
+     activeNode = -1;
+     lookAtPV(graphs.get(activeGraph).position, 1800);
+    break;
+    
+    case'X':
+    case'x':
+     lookAtPV(graphs.get(activeGraph).position, 1800);
     break;
   }
   
 }
 
+void lookAtPV(PVector vec, float dist){
+  cam.lookAt(vec.x, vec.y, vec.z, dist, 800);
+}
   
 String getFile(String dialogTxt) {
     String fName = "";
