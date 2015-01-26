@@ -1,6 +1,7 @@
+import controlP5.*; //<>//
+
 /*
 0.4.1
-fix: xml reading in processing 2 
 
 */
 
@@ -9,6 +10,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.filechooser.*;
 import javax.swing.filechooser.FileFilter;
 import peasy.*;
+import controlp5.*;
 
 
 PeasyCam cam;
@@ -22,18 +24,17 @@ PShader fog;
 PShader fogLine;
 
 public void setup(){
-    hint(ENABLE_STROKE_PURE);
+    // hint(ENABLE_STROKE_PURE);
     cam = new PeasyCam(this, 1000);
     cam.setWheelScale(2.0);
   
-    size(2400, 1200, P3D);
+    size(1280, 800, P3D);
     smooth();
-    scale(0.1);
     
     XML xml = loadXML("rozm.xml");
     for (int ig=0; ig<5; ig++){
       graphs.add(new Graph(xml));
-    } //<>//
+    }
     
     fog = loadShader("Fog.frag", "Fog.vert");
     fogLine = loadShader("FogLine.frag", "FogLine.vert");
@@ -57,7 +58,7 @@ public void draw() {
       n = graph.nodes.get(id);
       
       for(Edge edgeFrom: n.edgesFromThis){
-        strokeWeight(map(edgeFrom.weight, 0, 13, 1, 8));
+        strokeWeight(map(edgeFrom.weight, 0, 13, 1, 30));
         stroke(0, map(edgeFrom.weight, 0, 11, 20, 255));  
         line(n.position.x, n.position.y, n.position.z,
              edgeFrom.target.position.x, edgeFrom.target.position.y, edgeFrom.target.position.z);

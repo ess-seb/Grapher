@@ -23,8 +23,8 @@ void main() {
 
   //vertex in 'eye' or camera space
   vec3 ecVertex = vec3(modelview * vertex); 
-  float dist = -ecVertex.z/6000.0;
-  vertColor = vec4(1.0, 0.0, 0.0, 1.0 - dist);
+  float dist = -ecVertex.z/10000.0;
+  vertColor = color - vec4(0.0, 0.0, 0.0, dist);
 
   vec3 win0 = clipToWindow(clip0, viewport); 
   vec3 win1 = clipToWindow(clip1, viewport); 

@@ -7,11 +7,11 @@ varying vec4 vertColor;
 
 void main() {
   gl_Position = transform * vertex;
-  vertColor = color;
+  //vertColor = color;
 
   //vertex in 'eye' or camera space
   vec3 ecVertex = vec3(modelview * vertex); 
 
-  float dist = -ecVertex.z/6000.0;
-  vertColor = vec4(1.0, 0.0, 0.0, 1.0 - dist);
+  float dist = -ecVertex.z/4000.0;
+  vertColor = color - vec4(0.0, 0.0, 0.0, dist);
 }
