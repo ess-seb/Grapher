@@ -26,13 +26,12 @@ public class Graph {
         colB = node.getChild("viz:color").getInt("b");
       }
       color colour = color(colR, colG, colB);
-  
-      float ecce = node.getChild("attvalues").getChild(0).getFloat("value");
-      float closeness = node.getChild("attvalues").getChild(1).getFloat("value");
-      float between = node.getChild("attvalues").getChild(2).getFloat("value");
-      float modclass = node.getChild("attvalues").getChild(3).getFloat("value");
-      
-      //println(id + " " + label + " " + size + " " + position + " " + colour + " " + ecce + " " + closeness + " " + between + " " + modclass);
+      float ecce = node.getChild("attvalues").getChildren("attvalue")[0].getFloat("value");
+      float closeness = node.getChild("attvalues").getChildren("attvalue")[1].getFloat("value");
+      float between = node.getChild("attvalues").getChildren("attvalue")[2].getFloat("value");
+      float modclass = node.getChild("attvalues").getChildren("attvalue")[3].getFloat("value");
+
+      println(id + " " + label + " " + size + " " + position + " " + colour + " " + ecce + " " + closeness + " " + between + " " + modclass);
       this.nodes.put(id, new Node(id, label, size, position, colour, ecce, closeness, between, modclass));
       
     }

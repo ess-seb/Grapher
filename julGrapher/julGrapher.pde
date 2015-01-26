@@ -1,10 +1,6 @@
 /*
-change: visual style
-add: nodes' sizes depend on sum of their edges weight
-add: multi graphs space
-add: navigation by WSAD and X keys
-fix: scale problem
-add: active graph and Node (refs) bye WSAD
+0.4.1
+fix: xml reading in processing 2 
 
 */
 
@@ -22,12 +18,15 @@ Object activeNodeRef;
 int activeGraph = 0;
 int activeNode = 0;
 
+PShader fog;
+PShader fogLine;
+
 public void setup(){
-    hint (ENABLE_STROKE_PURE);
+    hint(ENABLE_STROKE_PURE);
     cam = new PeasyCam(this, 1000);
     cam.setWheelScale(2.0);
   
-    size(1280, 800, P3D);
+    size(2400, 1200, P3D);
     smooth();
     scale(0.1);
     
@@ -36,13 +35,19 @@ public void setup(){
       graphs.add(new Graph(xml));
     } //<>//
     
+    fog = loadShader("Fog.frag", "Fog.vert");
+    fogLine = loadShader("FogLine.frag", "FogLine.vert");
+    
 }
   
   
 public void draw() {
   background(190);
   fill(255);
-  // scale(0.1);
+  
+  shader(fog, TRIANGLES);
+  shader(fogLine, LINES);
+  noLights();
   
   for(Graph graph: graphs){
     pushMatrix();
@@ -78,10 +83,10 @@ public void draw() {
     }
     popMatrix();
   }
-} //<>//
+}
 
 
-public void keyReleased() { //<>//
+public void keyReleased() {
   switch(key){         
     case'l':
     case'L':
