@@ -2,10 +2,17 @@ public class Graph {
   
   HashMap<Integer, Node> nodes = new HashMap<Integer, Node>();
   PVector position;
+  int id;
+  String file;
+  String name;
+  String gender;
+  String country;
+  String age;
+  String desc;
   
   Graph(XML xmlGraph) {
     position = new PVector(random(4000),random(4000),random(4000));
-    println(position);
+    // println(position);
     
     XML[] nodes = xmlGraph.getChild("graph").getChild("nodes").getChildren("node");
     // println("Nodes: " + nodes.length);
@@ -65,9 +72,6 @@ public class Graph {
       this.nodes.get(source).addEdge(myEdge);
       this.nodes.get(target).addEdge(myEdge);
     }
-    Node n = this.nodes.get(33); //for debuging
-    println(this.nodes.get(121).edgesFromThis.get(1).target.id + " = 18006");
-    println(this.nodes.get(121).edgesToThis.get(1).source.id + " = 2064");
     println("LOADING COMPLETE");
   }
   
