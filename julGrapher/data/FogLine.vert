@@ -19,12 +19,12 @@ vec3 clipToWindow(vec4 clip, vec4 viewport) {
 void main() {
   vec4 clip0 = transform * vertex;
   vec4 clip1 = clip0 + transform * vec4(direction.xyz, 0);
-  float thickness = direction.w;
+  float thickness = direction.w * 5;
 
   //vertex in 'eye' or camera space
   vec3 ecVertex = vec3(modelview * vertex); 
-  float dist = -ecVertex.z/10000.0;
-  vertColor = color - vec4(0.0, 0.0, 0.0, dist);
+  float dist = -ecVertex.z/12000.0;
+  vertColor = color - vec4(0.0, 0.0, 100, dist);
 
   vec3 win0 = clipToWindow(clip0, viewport); 
   vec3 win1 = clipToWindow(clip1, viewport); 
@@ -36,5 +36,4 @@ void main() {
   vec2 offset = normal * thickness * 0.5;
   gl_Position.xy = clip0.xy + offset.xy;
   gl_Position.zw = clip0.zw;
-  //vertColor = color;  //processing default
 }

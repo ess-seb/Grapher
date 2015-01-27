@@ -5,9 +5,10 @@ public class Graph {
   
   Graph(XML xmlGraph) {
     position = new PVector(random(4000),random(4000),random(4000));
+    println(position);
     
     XML[] nodes = xmlGraph.getChild("graph").getChild("nodes").getChildren("node");
-    println("Nodes: " + nodes.length);
+    // println("Nodes: " + nodes.length);
     for(XML node: nodes){
       int id = node.getInt("id");
       String label = node.getString("label");
@@ -31,13 +32,13 @@ public class Graph {
       float between = node.getChild("attvalues").getChildren("attvalue")[2].getFloat("value");
       float modclass = node.getChild("attvalues").getChildren("attvalue")[3].getFloat("value");
 
-      println(id + " " + label + " " + size + " " + position + " " + colour + " " + ecce + " " + closeness + " " + between + " " + modclass);
+      // println(id + " " + label + " " + size + " " + position + " " + colour + " " + ecce + " " + closeness + " " + between + " " + modclass);
       this.nodes.put(id, new Node(id, label, size, position, colour, ecce, closeness, between, modclass));
       
     }
     
     XML[] edges = xmlGraph.getChild("graph").getChild("edges").getChildren("edge");
-    println("\n\nEdges: " + edges.length);
+    // println("\n\nEdges: " + edges.length);
     
     for(XML edge: edges){
       
@@ -58,7 +59,7 @@ public class Graph {
         weight = 0.0;
       }
       
-      println(id + " " + source + " " + target + " " + weight);
+      // println(id + " " + source + " " + target + " " + weight);
       
       Edge myEdge = new Edge(id, this.nodes.get(source), this.nodes.get(target), weight);
       this.nodes.get(source).addEdge(myEdge);
