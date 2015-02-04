@@ -56,6 +56,8 @@ public void setup(){
     //  .setGroup(g1);
     // controlP5.hide();
     
+     activeGraphRef = graphs.get(activeGraph);
+     lookAtPV(activeGraphRef.position, 2000);
 }
   
   
@@ -65,7 +67,7 @@ public void draw() {
    beginRaw(PDF, "frame-###.pdf");
   }
   
-  background(190);
+  background(179);
   
   fill(255);
   // if (doFog) { 
@@ -88,18 +90,10 @@ public void draw() {
 
     pushMatrix();
     translate(graph.position.x, graph.position.y, graph.position.z);
-
+    // hint(DISABLE_DEPTH_TEST);
     for(Integer id: graph.nodes.keySet()) {
       Node n = null;
       n = graph.nodes.get(id);
-      
-      
-      for(Edge edgeFrom: n.edgesFromThis){
-        strokeWeight(map(edgeFrom.weight, 0, 13, 1, 8));
-        stroke(0, map(edgeFrom.weight, 0, 11, 20, 255));  
-        line(n.position.x, n.position.y, n.position.z,
-             edgeFrom.target.position.x, edgeFrom.target.position.y, edgeFrom.target.position.z);
-      }
       
       noStroke();
       pushMatrix();
@@ -113,12 +107,23 @@ public void draw() {
       for(Edge e: n.edgesToThis){
         size += e.weight;
       }
+      
       box(map(size, 0, 50, 10, 50));
+      
       popMatrix();
+      
+      for(Edge edgeFrom: n.edgesFromThis){
+        strokeWeight(map(edgeFrom.weight, 0, 13, 1, 8));
+        stroke(0, map(edgeFrom.weight, 0, 11, 20, 255));  
+        line(n.position.x, n.position.y, n.position.z,
+             edgeFrom.target.position.x, edgeFrom.target.position.y, edgeFrom.target.position.z);
+      }
+      
+      
     }
     popMatrix();
   }
-  
+  // hint(ENABLE_DEPTH_TEST);
   if (record) { 
     endRaw();
     record = false;
@@ -237,12 +242,12 @@ void hud() {
   hint(DISABLE_DEPTH_TEST);
   cam.beginHUD();
     if (pointerV != null && activeGraphRef != null) {
-        stroke(200);
+        noStroke();
         strokeWeight(3);
-        noFill();
+        fill(255, 204, 153);
         ellipseMode(RADIUS);
         float dellipse = PVector.dist(new PVector(cam.getPosition()[0], cam.getPosition()[1], cam.getPosition()[2]), activeGraphRef.position);
-        float radious = constrain(map(dellipse, 0, 10000, 500, 50), 100, 400);
+        float radious = constrain(map(dellipse, 0, 10000, 300, 50), 50, 300);
         ellipse(pointerV.x, pointerV.y, radious, radious);
         fill(255);
         println(radious);
