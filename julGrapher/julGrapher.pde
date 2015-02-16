@@ -26,6 +26,8 @@ int activeNode = 0;
 PVector pointerV = new PVector();
 
 
+PFont myFont = loadFont("Klavika-Regular-48.vlw");
+
 PShader fog;
 PShader fogLine;
 
@@ -250,7 +252,12 @@ void hud() {
         float radious = constrain(map(dellipse, 0, 10000, 300, 50), 50, 300);
         ellipse(pointerV.x, pointerV.y, radious, radious);
         fill(255);
-        println(radious);
+        
+        //text
+        textAlign(CENTER);
+        fill(0);
+        textFont(myFont, 48);
+        text(activeGraphRef.name, pointerV.x, pointerV.y);
       }
   // controlP5.draw();
   hint(ENABLE_DEPTH_TEST);
