@@ -18,7 +18,8 @@ public class Node {
   Node(int id, String label, float size, PVector position, color colour, float ecce, float closeness, float between, float modclass) {
 
     this.id = id;
-    this.label = label;
+    if (label != null) this.label = label;
+    else this.label = "";
 
     this.size = size;
     this.position = position;

@@ -1,9 +1,6 @@
 /* //<>//
-add: config file
-add: new graph attributes
-add: export to pdf, dxf and png
-change: highlight ellipse size depends on distance
-fix: activeNodeRef contains reference to Node object now
+add: label system (graph labels M key, node labels N)
+add: reload data (R key)
 */
 
 import javax.swing.*;
@@ -12,13 +9,15 @@ import javax.swing.filechooser.*;
 import javax.swing.filechooser.FileFilter;
 import peasy.*;
 import controlP5.*;
-// import processing.dxf.*;
+import processing.dxf.*;
 import processing.pdf.*;
 
 boolean record;
 PeasyCam cam;
 boolean dataLoaded = false;
 ArrayList<Graph> graphs = new ArrayList<Graph>();
+ArrayList<Label> labelsNode = new ArrayList<Label>();
+ArrayList<Label> labelsGraph = new ArrayList<Label>();
 Graph activeGraphRef;
 Node activeNodeRef;
 int activeGraph = 0;
@@ -26,13 +25,20 @@ int activeNode = 0;
 PVector pointerV = new PVector();
 
 
-PFont myFont = loadFont("Klavika-Regular-48.vlw");
+PFont fontGraphLabel = createFont("Klavika-Medium", 50, true);
+PFont fontNodeLabel = createFont("Klavika-Regular", 50, true);
+
+color colorNodes = color(0);
+color colorEdges = color(0);
+
+
+
 
 PShader fog;
 PShader fogLine;
 
 ControlP5 controlP5;
-boolean showPanel = false, doFog = false;
+boolean showPanel = false, doFog = false, showGraphLabels = true, showNodeLabels = true;
 
 public void setup(){
     frameRate(24);
@@ -50,6 +56,8 @@ public void setup(){
     // fog = loadShader("Fog.frag", "Fog.vert");
     // fogLine = loadShader("FogLine.frag", "FogLine.vert");
     loadData();
+    activeGraphRef = graphs.get(activeGraph);
+    lookAtPV(activeGraphRef.position, 2000);
     
     // controlP5 = new ControlP5(this);
     // controlP5.setAutoDraw(false);
@@ -58,8 +66,7 @@ public void setup(){
     //  .setGroup(g1);
     // controlP5.hide();
     
-     activeGraphRef = graphs.get(activeGraph);
-     lookAtPV(activeGraphRef.position, 2000);
+     
 }
   
   
@@ -82,12 +89,18 @@ public void draw() {
   // }
   
 
-  hud();
+  
   if (activeGraphRef != null) {
       pointerV.x = screenX(activeGraphRef.position.x, activeGraphRef.position.y, activeGraphRef.position.z);
       pointerV.y = screenY(activeGraphRef.position.x, activeGraphRef.position.y, activeGraphRef.position.z);
   }
-    
+  if (activeGraphRef != null && showGraphLabels) {
+      labelsGraph.add(new Label(screenX(activeGraphRef.position.x, activeGraphRef.position.y, activeGraphRef.position.z),
+                               screenY(activeGraphRef.position.x, activeGraphRef.position.y, activeGraphRef.position.z),
+                               0, 0, activeGraphRef.name, 48, fontGraphLabel));
+  }
+  hudBack();
+  
   for(Graph graph: graphs){
 
     pushMatrix();
@@ -97,26 +110,36 @@ public void draw() {
       Node n = null;
       n = graph.nodes.get(id);
       
-      noStroke();
-      pushMatrix();
-      translate(n.position.x, n.position.y, n.position.z);
-      
-      // int size = n.edgesFromThis.size() + n.edgesToThis.size();
-      int size = 0;
+      float size = 0;
       for(Edge e: n.edgesFromThis){
         size += e.weight;
       }
       for(Edge e: n.edgesToThis){
         size += e.weight;
       }
+      size = map(size, 0, 50, 10, 50);
       
-      box(map(size, 0, 50, 10, 50));
+      if (activeGraphRef == graph && showNodeLabels){
+        labelsNode.add(new Label(screenX(n.position.x, n.position.y, n.position.z),
+                                 screenY(n.position.x, n.position.y, n.position.z),
+                                 0, 0, n.label, 15, fontNodeLabel));
+      }
+      // int size = n.edgesFromThis.size() + n.edgesToThis.size();
+     
+      pushMatrix();
+      translate(n.position.x, n.position.y, n.position.z);
+      
+
+      fill(colorNodes);
+      noStroke();
+      box(size);
+      
       
       popMatrix();
       
       for(Edge edgeFrom: n.edgesFromThis){
         strokeWeight(map(edgeFrom.weight, 0, 13, 1, 8));
-        stroke(0, map(edgeFrom.weight, 0, 11, 20, 255));  
+        stroke(colorEdges, map(edgeFrom.weight, 0, 11, 20, 255));  
         line(n.position.x, n.position.y, n.position.z,
              edgeFrom.target.position.x, edgeFrom.target.position.y, edgeFrom.target.position.z);
       }
@@ -124,6 +147,7 @@ public void draw() {
       
     }
     popMatrix();
+    hudFront();
   }
   // hint(ENABLE_DEPTH_TEST);
   if (record) { 
@@ -206,6 +230,20 @@ public void keyReleased() {
         controlP5.hide();
       }
     break;
+    case'M':
+    case'm':
+      showGraphLabels = !showGraphLabels;
+    break;
+    case'N':
+    case'n':
+      showNodeLabels = !showNodeLabels;
+    break;
+    case'R':
+      graphs.clear();
+      loadData();
+      activeGraphRef = graphs.get(activeGraph);
+      lookAtPV(activeGraphRef.position, 2000);
+    break;
   }
   
 }
@@ -240,10 +278,10 @@ boolean hasChild(XML myXml, String myKey) {
 }
 
 
-void hud() {
+void hudBack() {
   hint(DISABLE_DEPTH_TEST);
   cam.beginHUD();
-    if (pointerV != null && activeGraphRef != null) {
+    if (pointerV != null && activeGraphRef != null && showGraphLabels) {
         noStroke();
         strokeWeight(3);
         fill(255, 204, 153);
@@ -251,18 +289,37 @@ void hud() {
         float dellipse = PVector.dist(new PVector(cam.getPosition()[0], cam.getPosition()[1], cam.getPosition()[2]), activeGraphRef.position);
         float radious = constrain(map(dellipse, 0, 10000, 300, 50), 50, 300);
         ellipse(pointerV.x, pointerV.y, radious, radious);
-        fill(255);
         
-        //text
-        textAlign(CENTER);
-        fill(0);
-        textFont(myFont, 48);
-        text(activeGraphRef.name, pointerV.x, pointerV.y);
+        drawLabels(labelsGraph);
+        drawLabels(labelsNode);     
+        
       }
   // controlP5.draw();
   hint(ENABLE_DEPTH_TEST);
   cam.endHUD();
 
+}
+
+
+void hudFront() {
+  hint(DISABLE_DEPTH_TEST);
+  cam.beginHUD();
+      if (showGraphLabels) drawLabels(labelsGraph);
+      if (showNodeLabels) drawLabels(labelsNode);
+  hint(ENABLE_DEPTH_TEST);
+  cam.endHUD();
+
+}
+
+
+void drawLabels(ArrayList<Label> labels){
+  for (Label lab: labels){
+          textAlign(CENTER);
+          fill(255);
+          textFont(fontGraphLabel, lab.size);
+          text(lab.text, lab.x + lab.offx, lab.y + lab.offy);
+        }
+        labels.clear();
 }
 
 void controlEvent(ControlEvent theEvent) {
