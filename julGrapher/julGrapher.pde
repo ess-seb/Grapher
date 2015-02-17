@@ -20,16 +20,18 @@ ArrayList<Label> labelsNode = new ArrayList<Label>();
 ArrayList<Label> labelsGraph = new ArrayList<Label>();
 Graph activeGraphRef;
 Node activeNodeRef;
+Node overMouseNodeRef;
 int activeGraph = 0;
 int activeNode = 0;
 PVector pointerV = new PVector();
 
 
-PFont fontGraphLabel = createFont("Klavika-Medium", 50, true);
-PFont fontNodeLabel = createFont("Klavika-Regular", 50, true);
+PFont fontGraphLabel;
+PFont fontNodeLabel;
 
 color colorNodes = color(0);
 color colorEdges = color(0);
+color colorNodeActive = color(255);
 
 
 
@@ -41,6 +43,8 @@ ControlP5 controlP5;
 boolean showPanel = false, doFog = false, showGraphLabels = true, showNodeLabels = true;
 
 public void setup(){
+    fontGraphLabel = loadFont("Klavika-Medium-50.vlw");
+    fontNodeLabel = loadFont("Klavika-Regular-50.vlw");
     frameRate(24);
     noLoop();
     hint(ENABLE_STROKE_PURE);
@@ -124,13 +128,22 @@ public void draw() {
                                  screenY(n.position.x, n.position.y, n.position.z),
                                  0, 0, n.label, 15, fontNodeLabel));
       }
+      
       // int size = n.edgesFromThis.size() + n.edgesToThis.size();
-     
+      if (dist(screenX(n.position.x, n.position.y, n.position.z),
+               screenY(n.position.x, n.position.y, n.position.z),
+               mouseX, mouseY) < 6 && activeGraphRef == graph){
+        fill(colorNodeActive);
+        overMouseNodeRef = n;
+      } else {
+        fill(colorNodes);
+      }
+       
       pushMatrix();
       translate(n.position.x, n.position.y, n.position.z);
       
 
-      fill(colorNodes);
+      
       noStroke();
       box(size);
       
@@ -353,4 +366,13 @@ boolean loadData(){
     }
     loop();
     return true;
+}
+
+void mouseClicked() {
+  println(overMouseNodeRef);
+  if (overMouseNodeRef != activeNodeRef) {
+    activeNodeRef = overMouseNodeRef;
+    lookAtPV(PVector.add(activeGraphRef.position, activeNodeRef.position), 300);
+    println("yo");
+  }
 }
