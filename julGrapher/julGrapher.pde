@@ -1,9 +1,10 @@
 /* //<>//
-add: label system (graph labels M key, node labels N)
-add: reload data (R key)
+add: nodes' color from file (C key)
+add: nodes' size from file (Z key)
+add: connection finding
 */
 
-import javax.swing.*;
+import javax.swing.*; 
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.*;
 import javax.swing.filechooser.FileFilter;
@@ -31,8 +32,10 @@ PFont fontNodeLabel;
 
 color colorNodes = color(0);
 color colorEdges = color(0);
-color colorNodeActive = color(255);
-
+color colorActiveNode = color(203, 255, 229);
+color colorConnNodes = color(155, 255, 205);
+color colorHlActive = color(255);
+color colorHL = color(255, 204, 153);
 
 
 
@@ -40,7 +43,8 @@ PShader fog;
 PShader fogLine;
 
 ControlP5 controlP5;
-boolean showPanel = false, doFog = false, showGraphLabels = true, showNodeLabels = true;
+boolean showPanel = false, doFog = false, showGraphLabels = true, showNodeLabels = true, showColors = false;
+boolean showSize = false;
 
 public void setup(){
     fontGraphLabel = loadFont("Klavika-Medium-50.vlw");
@@ -115,13 +119,17 @@ public void draw() {
       n = graph.nodes.get(id);
       
       float size = 0;
-      for(Edge e: n.edgesFromThis){
-        size += e.weight;
+      if (!showSize) {
+        for(Edge e: n.edgesFromThis) {
+          size += e.weight;
+        }
+        for(Edge e: n.edgesToThis) {
+          size += e.weight;
+        }
+        size = map(size, 0, 50, 10, 50);
+      } else {
+        size = map(n.size, 0, 100, 10, 50);
       }
-      for(Edge e: n.edgesToThis){
-        size += e.weight;
-      }
-      size = map(size, 0, 50, 10, 50);
       
       if (activeGraphRef == graph && showNodeLabels){
         labelsNode.add(new Label(screenX(n.position.x, n.position.y, n.position.z),
@@ -133,10 +141,17 @@ public void draw() {
       if (dist(screenX(n.position.x, n.position.y, n.position.z),
                screenY(n.position.x, n.position.y, n.position.z),
                mouseX, mouseY) < 6 && activeGraphRef == graph){
-        fill(colorNodeActive);
+        fill(colorHlActive);
         overMouseNodeRef = n;
       } else {
-        fill(colorNodes);
+        if (showColors) fill(n.colour);
+        else {
+          fill(colorNodes);
+          if (activeNodeRef != null) {
+            if (isNearNode(n, activeNodeRef, 1) && n != activeNodeRef) fill(colorConnNodes);
+            else if (n == activeNodeRef) fill(colorActiveNode);
+          }
+        }
       }
        
       pushMatrix();
@@ -251,6 +266,14 @@ public void keyReleased() {
     case'n':
       showNodeLabels = !showNodeLabels;
     break;
+    case'C':
+    case'c':
+      showColors = !showColors;
+    break;
+    case'Z':
+    case'z':
+      showSize = !showSize;
+    break;
     case'R':
       graphs.clear();
       loadData();
@@ -297,7 +320,7 @@ void hudBack() {
     if (pointerV != null && activeGraphRef != null && showGraphLabels) {
         noStroke();
         strokeWeight(3);
-        fill(255, 204, 153);
+        fill(colorHL);
         ellipseMode(RADIUS);
         float dellipse = PVector.dist(new PVector(cam.getPosition()[0], cam.getPosition()[1], cam.getPosition()[2]), activeGraphRef.position);
         float radious = constrain(map(dellipse, 0, 10000, 300, 50), 50, 300);
@@ -375,4 +398,41 @@ void mouseClicked() {
     lookAtPV(PVector.add(activeGraphRef.position, activeNodeRef.position), 300);
     println("yo");
   }
+}
+
+boolean isNearNode(Node nProbe, Node nSearch, int deep) {
+  deep--;
+  boolean success = false;
+  if (deep >= 0){
+      
+    for (Edge edge: nProbe.edgesFromThis) {
+      if (edge.target == nSearch || success){
+        success = true;
+        break;
+      } else {
+        for (Edge edgeD: edge.target.edgesFromThis) {
+         if (isNearNode(edgeD.target, nSearch, deep)){
+           success = true;
+           break;
+         }
+        }
+      }
+    }
+    
+    for (Edge edge: nProbe.edgesToThis) {
+      if (edge.source == nSearch || success){
+        success = true;
+        break;
+      } else {
+        for (Edge edgeD: edge.source.edgesToThis) {
+         if (isNearNode(edgeD.source, nSearch, deep)){
+           success = true;
+           break;
+         }
+        }
+      }
+    }
+    
+  }
+  return success; 
 }
