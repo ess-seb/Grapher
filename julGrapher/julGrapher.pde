@@ -274,7 +274,7 @@ public void keyReleased() {
      }
      activeNode = -1;
      thread("speakGraphLabel");
-     lookAtPV(graphs.get(activeGraph).position, 1800);
+     lookAtPV(activeGraphRef.position, 2000);
     break;
     
     case'P':
