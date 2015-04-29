@@ -65,6 +65,9 @@ public void setup(){
     cam.setResetOnDoubleClick(false);
     frame.setLocation(0, 0);
     tts = new TTS();
+    tts.setPitch( 0.5 );
+    // tts.setPitchRange( 2000 )
+    // tts.setPitchShift( 2 )
     
     size(1920, 1080, P3D);
     background(190);
