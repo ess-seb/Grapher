@@ -163,8 +163,8 @@ public void draw() {
           case COLOR_NEAR_ONES:
             fill(colorNodes);
             txtColor = color(255);
-            if (activeNodeRef != null) {
-              if (isNearNode(n, activeNodeRef, 1) && n != activeNodeRef && activeGraphRef == graph){
+            if (activeNodeRef != null && activeGraphRef == graph) {
+              if (isNearNode(n, activeNodeRef, 1) && n != activeNodeRef){
                 fill(colorConnNodes);
                 txtColor = color(0);
               }
