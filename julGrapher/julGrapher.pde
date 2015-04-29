@@ -1,7 +1,10 @@
 /* //<>//
-add: nodes' color from file (C key)
-add: nodes' size from file (Z key)
-add: connection finding
+fix: add modes 1, 2, 3 for color views
+fix: label colouring
+add: tts for node and graph Label 
+add: color active group mode
+fix: doubleclick camera 
+
 */
 
 import javax.swing.*; 
@@ -10,6 +13,7 @@ import javax.swing.filechooser.*;
 import javax.swing.filechooser.FileFilter;
 import peasy.*;
 import controlP5.*;
+import guru.ttslib.*;
 import processing.dxf.*;
 import processing.pdf.*;
 
@@ -25,7 +29,7 @@ Node overMouseNodeRef;
 int activeGraph = 0;
 int activeNode = 0;
 PVector pointerV = new PVector();
-
+TTS tts;
 
 PFont fontGraphLabel;
 PFont fontNodeLabel;
@@ -38,24 +42,30 @@ color colorHlActive = color(255);
 color colorHL = color(255, 204, 153);
 
 
-
 PShader fog;
 PShader fogLine;
 
 ControlP5 controlP5;
 boolean showPanel = false, doFog = false, showGraphLabels = true, showNodeLabels = true, showColors = false;
-boolean showSize = false;
+boolean showSize = true;
+
+static final int COLOR_ACTIVE_GROUP = 0, COLOR_FROM_FILE = 1, COLOR_NEAR_ONES = 2;
+int viewMode = COLOR_NEAR_ONES;
+
+//colorModes: colorActiveGroup, colorFromFile, colorNearOnes
 
 public void setup(){
-    fontGraphLabel = loadFont("Klavika-Medium-50.vlw");
-    fontNodeLabel = loadFont("Klavika-Regular-50.vlw");
+    fontGraphLabel = loadFont("Klavika-Medium-70.vlw");
+    fontNodeLabel = loadFont("Klavika-Regular-70.vlw");
     frameRate(24);
     noLoop();
     hint(ENABLE_STROKE_PURE);
     cam = new PeasyCam(this, 1000);
     cam.setWheelScale(2.0);
+    cam.setResetOnDoubleClick(false);
     frame.setLocation(0, 0);
-  
+    tts = new TTS();
+    
     size(1920, 1080, P3D);
     background(190);
     smooth();
@@ -105,7 +115,7 @@ public void draw() {
   if (activeGraphRef != null && showGraphLabels) {
       labelsGraph.add(new Label(screenX(activeGraphRef.position.x, activeGraphRef.position.y, activeGraphRef.position.z),
                                screenY(activeGraphRef.position.x, activeGraphRef.position.y, activeGraphRef.position.z),
-                               0, 0, activeGraphRef.name, 48, fontGraphLabel));
+                               0, 0, activeGraphRef.name, color(255), 48, fontGraphLabel));
   }
   hudBack();
   
@@ -131,33 +141,63 @@ public void draw() {
         size = map(n.size, 0, 100, 10, 50);
       }
       
-      if (activeGraphRef == graph && showNodeLabels){
-        labelsNode.add(new Label(screenX(n.position.x, n.position.y, n.position.z),
-                                 screenY(n.position.x, n.position.y, n.position.z),
-                                 0, 0, n.label, 15, fontNodeLabel));
-      }
-      
+      color txtColor = color(255);
       // int size = n.edgesFromThis.size() + n.edgesToThis.size();
       if (dist(screenX(n.position.x, n.position.y, n.position.z),
                screenY(n.position.x, n.position.y, n.position.z),
                mouseX, mouseY) < 6 && activeGraphRef == graph){
         fill(colorHlActive);
+        txtColor = color(0);
         overMouseNodeRef = n;
       } else {
-        if (showColors) fill(n.colour);
-        else {
-          fill(colorNodes);
-          if (activeNodeRef != null) {
-            if (isNearNode(n, activeNodeRef, 1) && n != activeNodeRef) fill(colorConnNodes);
-            else if (n == activeNodeRef) fill(colorActiveNode);
-          }
+        
+        switch (viewMode) {
+          case COLOR_FROM_FILE:
+            fill(n.colour);
+            txtColor = color(255); 
+          break;
+          
+          case COLOR_NEAR_ONES:
+            fill(colorNodes);
+            txtColor = color(255);
+            if (activeNodeRef != null) {
+              if (isNearNode(n, activeNodeRef, 1) && n != activeNodeRef){
+                fill(colorConnNodes);
+                txtColor = color(0);
+              }
+              else if (n == activeNodeRef) 
+              {
+               txtColor = color(0); 
+               fill(colorActiveNode);
+              }
+            }
+          break;
+          
+          case COLOR_ACTIVE_GROUP:
+            fill(colorNodes);
+            if (activeNodeRef != null) {
+              if (activeNodeRef.colour == n.colour && activeGraphRef == graph){
+                fill(colorConnNodes);
+                txtColor = color(0);
+              }
+              if (n == activeNodeRef){
+                fill(colorActiveNode);
+                txtColor = color(0);
+              }
+            }
+          break;
+          
         }
       }
-       
+      
+      if (activeGraphRef == graph && showNodeLabels){
+        labelsNode.add(new Label(screenX(n.position.x, n.position.y, n.position.z),
+                                 screenY(n.position.x, n.position.y, n.position.z),
+                                 0, 0, n.label, txtColor, 20, fontNodeLabel));
+      }
+      
       pushMatrix();
       translate(n.position.x, n.position.y, n.position.z);
-      
-
       
       noStroke();
       box(size);
@@ -177,7 +217,6 @@ public void draw() {
     popMatrix();
     hudFront();
   }
-  // hint(ENABLE_DEPTH_TEST);
   if (record) { 
     endRaw();
     record = false;
@@ -188,14 +227,7 @@ public void draw() {
 
 
 public void keyReleased() {
-  switch(key){         
-    case'l':
-    case'L':
-      String flName = getFile("Load XML");
-      println("LOADING COMPLETE:");
-      XML xmlLoaded = new XML(flName);
-    break;
-    
+  switch(key){            
     case'A':
     case'a':
      activeNode--;
@@ -204,6 +236,7 @@ public void keyReleased() {
      }
      println("aN: " + activeNode + " ");
      activeNodeRef = activeGraphRef.nodes.get(activeGraphRef.nodes.keySet().toArray()[activeNode]);
+     thread("speakNodeLabel");
      lookAtPV(PVector.add(activeGraphRef.position, activeNodeRef.position), 300);
     break;
     
@@ -214,7 +247,8 @@ public void keyReleased() {
        activeNode = 0;
      }
      activeNodeRef = activeGraphRef.nodes.get(activeGraphRef.nodes.keySet().toArray()[activeNode]);
-       lookAtPV(PVector.add(activeGraphRef.position, activeNodeRef.position), 300); //<>//
+     thread("speakNodeLabel");
+     lookAtPV(PVector.add(activeGraphRef.position, activeNodeRef.position), 300);
     break;
     
     case'W':
@@ -225,6 +259,7 @@ public void keyReleased() {
      }
      activeNode = -1;
      activeGraphRef = graphs.get(activeGraph);
+     thread("speakGraphLabel");
      lookAtPV(activeGraphRef.position, 2000);
     break;
     
@@ -235,6 +270,7 @@ public void keyReleased() {
        activeGraph = 0;
      }
      activeNode = -1;
+     thread("speakGraphLabel");
      lookAtPV(graphs.get(activeGraph).position, 1800);
     break;
     
@@ -266,9 +302,14 @@ public void keyReleased() {
     case'n':
       showNodeLabels = !showNodeLabels;
     break;
-    case'C':
-    case'c':
-      showColors = !showColors;
+    case'1':
+      viewMode = COLOR_FROM_FILE;
+    break;
+    case'2':
+      viewMode = COLOR_NEAR_ONES;
+    break;
+    case'3':
+      viewMode = COLOR_ACTIVE_GROUP;
     break;
     case'Z':
     case'z':
@@ -350,9 +391,9 @@ void hudFront() {
 
 void drawLabels(ArrayList<Label> labels){
   for (Label lab: labels){
-          textAlign(CENTER);
-          fill(255);
           textFont(fontGraphLabel, lab.size);
+          textAlign(CENTER);
+          fill(lab.colour);
           text(lab.text, lab.x + lab.offx, lab.y + lab.offy);
         }
         labels.clear();
@@ -395,10 +436,22 @@ void mouseClicked() {
   println(overMouseNodeRef);
   if (overMouseNodeRef != activeNodeRef) {
     activeNodeRef = overMouseNodeRef;
+    // speaker.speak(activeNodeRef.label);
+    thread("speakNodeLabel");
     lookAtPV(PVector.add(activeGraphRef.position, activeNodeRef.position), 300);
-    println("yo");
   }
 }
+
+// void mousePressed(){
+//   if(mouseButton==LEFT){
+//      if(mouseEvent.getClickCount()==2){
+//         lookAtPV(graphs.get(activeGraph).position, 1800);
+//         activeNodeRef=null;
+//         // activeGraphRef = activeGraphOri;
+//     }
+//   }
+// }
+
 
 boolean isNearNode(Node nProbe, Node nSearch, int deep) {
   deep--;
@@ -435,4 +488,12 @@ boolean isNearNode(Node nProbe, Node nSearch, int deep) {
     
   }
   return success; 
+}
+
+void speakNodeLabel(){
+  tts.speak(activeNodeRef.label);
+}
+
+void speakGraphLabel(){
+  tts.speak(activeGraphRef.name);
 }

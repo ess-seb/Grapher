@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2" xmlns:viz="http://www.gexf.net/1.2draft/viz" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd">
+  <meta lastmodifieddate="2015-03-22">
+    <creator>Gephi 0.8.1</creator>
+    <description></description>
+  </meta>
+  <graph defaultedgetype="undirected" mode="static">
+    <attributes class="node" mode="static">
+      <attribute id="eccentricity" title="Eccentricity" type="double">
+        <default>0.0</default>
+      </attribute>
+      <attribute id="closnesscentrality" title="Closeness Centrality" type="double">
+        <default>0.0</default>
+      </attribute>
+      <attribute id="betweenesscentrality" title="Betweenness Centrality" type="double">
+        <default>0.0</default>
+      </attribute>
+      <attribute id="modularity_class" title="Modularity Class" type="integer">
+        <default>0</default>
+      </attribute>
+    </attributes>
+    <nodes>
+      <node id="58572" label="polish">
+        <attvalues>
+          <attvalue for="eccentricity" value="1.0"></attvalue>
+          <attvalue for="closnesscentrality" value="1.0"></attvalue>
+          <attvalue for="betweenesscentrality" value="0.0"></attvalue>
+          <attvalue for="modularity_class" value="0"></attvalue>
+        </attvalues>
+        <viz:size value="4.0"></viz:size>
+        <viz:position x="2.9960537" y="-42.162186" z="-6.1865263"></viz:position>
+        <viz:color r="254" g="252" b="252"></viz:color>
+      </node>
+      <node id="543" label="year">
+        <attvalues>
+          <attvalue for="eccentricity" value="1.0"></attvalue>
+          <attvalue for="closnesscentrality" value="1.0"></attvalue>
+          <attvalue for="betweenesscentrality" value="0.0"></attvalue>
+          <attvalue for="modularity_class" value="0"></attvalue>
+        </attvalues>
+        <viz:size value="4.0"></viz:size>
+        <viz:position x="38.2338" y="18.882694" z="2.5516095"></viz:position>
+        <viz:color r="254" g="252" b="252"></viz:color>
+      </node>
+      <node id="3267" label="girl">
+        <attvalues>
+          <attvalue for="eccentricity" value="0.0"></attvalue>
+          <attvalue for="closnesscentrality" value="0.0"></attvalue>
+          <attvalue for="betweenesscentrality" value="0.0"></attvalue>
+          <attvalue for="modularity_class" value="0"></attvalue>
+        </attvalues>
+        <viz:size value="4.0"></viz:size>
+        <viz:position x="-55.604862" y="-12.223405" z="-41.377445"></viz:position>
+        <viz:color r="251" g="243" b="243"></viz:color>
+      </node>
+      <node id="189" label="happy">
+        <attvalues>
+          <attvalue for="eccentricity" value="1.0"></attvalue>
+          <attvalue for="closnesscentrality" value="1.0"></attvalue>
+          <attvalue for="betweenesscentrality" value="0.0"></attvalue>
+          <attvalue for="modularity_class" value="0"></attvalue>
+        </attvalues>
+        <viz:size value="4.0"></viz:size>
+        <viz:position x="-12.322611" y="50.57679" z="47.36598"></viz:position>
+        <viz:color r="254" g="252" b="252"></viz:color>
+      </node>
+    </nodes>
+    <edges>
+      <edge id="63203809" source="58572" target="3267" weight="2.0">
+        <attvalues></attvalues>
+      </edge>
+      <edge id="63203806" source="543" target="58572" weight="2.0">
+        <attvalues></attvalues>
+      </edge>
+      <edge id="63203808" source="543" target="3267">
+        <attvalues></attvalues>
+      </edge>
+      <edge id="63203804" source="189" target="58572">
+        <attvalues></attvalues>
+      </edge>
+      <edge id="63203802" source="189" target="543" weight="2.0">
+        <attvalues></attvalues>
+      </edge>
+      <edge id="63203805" source="189" target="3267">
+        <attvalues></attvalues>
+      </edge>
+    </edges>
+  </graph>
+</gexf>
