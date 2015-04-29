@@ -164,7 +164,7 @@ public void draw() {
             fill(colorNodes);
             txtColor = color(255);
             if (activeNodeRef != null) {
-              if (isNearNode(n, activeNodeRef, 1) && n != activeNodeRef){
+              if (isNearNode(n, activeNodeRef, 1) && n != activeNodeRef && activeGraphRef == graph){
                 fill(colorConnNodes);
                 txtColor = color(0);
               }
