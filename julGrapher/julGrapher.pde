@@ -270,9 +270,10 @@ public void keyReleased() {
     case's':
       activeGraph--;
      if (activeGraph < 0){
-       activeGraph = 0;
+       activeGraph = graphs.size()-1;
      }
      activeNode = -1;
+     activeGraphRef = graphs.get(activeGraph);
      thread("speakGraphLabel");
      lookAtPV(activeGraphRef.position, 2000);
     break;
