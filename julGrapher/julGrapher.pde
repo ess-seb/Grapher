@@ -55,6 +55,7 @@ int viewMode = COLOR_ACTIVE_GROUP;
 //colorModes: colorActiveGroup, colorFromFile, colorNearOnes
 
 public void setup(){
+    noCursor();
     fontGraphLabel = loadFont("Klavika-Medium-70.vlw");
     fontNodeLabel = loadFont("Klavika-Regular-70.vlw");
     frameRate(24);
@@ -183,7 +184,7 @@ public void draw() {
                 fill(colorConnNodes);
                 txtColor = color(0);
               }
-              if (n == activeNodeRef){
+              if (n == activeNodeRef && activeGraphRef == graph)){
                 fill(colorActiveNode);
                 txtColor = color(0);
               }
@@ -226,10 +227,7 @@ public void draw() {
     background(255,255,0);
   }
   
-  strokeWeight(1);
-  stroke(colorActiveNode);  
-  line(mouseX, 0, mouseX, height);
-  line(0, mouseY, width, mouseY);
+
   
 }
 
@@ -397,6 +395,10 @@ void hudFront() {
       if (showGraphLabels) drawLabels(labelsGraph);
       if (showNodeLabels) drawLabels(labelsNode);
   hint(ENABLE_DEPTH_TEST);
+  strokeWeight(1);
+  stroke(255);  
+  line(mouseX, 0, mouseX, height);
+  line(0, mouseY, width, mouseY);
   cam.endHUD();
 
 }
