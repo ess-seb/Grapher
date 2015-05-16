@@ -184,7 +184,7 @@ public void draw() {
                 fill(colorConnNodes);
                 txtColor = color(0);
               }
-              if (n == activeNodeRef && activeGraphRef == graph)){
+              if (n == activeNodeRef&& activeGraphRef == graph){
                 fill(colorActiveNode);
                 txtColor = color(0);
               }
