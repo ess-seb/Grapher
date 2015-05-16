@@ -47,10 +47,10 @@ PShader fogLine;
 
 ControlP5 controlP5;
 boolean showPanel = false, doFog = false, showGraphLabels = true, showNodeLabels = true, showColors = false;
-boolean showSize = true;
+boolean showSize = true, doSound = false;
 
 static final int COLOR_ACTIVE_GROUP = 0, COLOR_FROM_FILE = 1, COLOR_NEAR_ONES = 2;
-int viewMode = COLOR_NEAR_ONES;
+int viewMode = COLOR_ACTIVE_GROUP;
 
 //colorModes: colorActiveGroup, colorFromFile, colorNearOnes
 
@@ -239,7 +239,7 @@ public void keyReleased() {
      }
      println("aN: " + activeNode + " ");
      activeNodeRef = activeGraphRef.nodes.get(activeGraphRef.nodes.keySet().toArray()[activeNode]);
-     thread("speakNodeLabel");
+     if (doSound) thread("speakNodeLabel");
      lookAtPV(PVector.add(activeGraphRef.position, activeNodeRef.position), 300);
     break;
     
@@ -250,7 +250,7 @@ public void keyReleased() {
        activeNode = 0;
      }
      activeNodeRef = activeGraphRef.nodes.get(activeGraphRef.nodes.keySet().toArray()[activeNode]);
-     thread("speakNodeLabel");
+     if (doSound) thread("speakNodeLabel");
      lookAtPV(PVector.add(activeGraphRef.position, activeNodeRef.position), 300);
     break;
     
@@ -262,7 +262,7 @@ public void keyReleased() {
      }
      activeNode = -1;
      activeGraphRef = graphs.get(activeGraph);
-     thread("speakGraphLabel");
+     if (doSound) thread("speakGraphLabel");
      lookAtPV(activeGraphRef.position, 2000);
     break;
     
@@ -274,7 +274,7 @@ public void keyReleased() {
      }
      activeNode = -1;
      activeGraphRef = graphs.get(activeGraph);
-     thread("speakGraphLabel");
+     if (doSound) thread("speakGraphLabel");
      lookAtPV(activeGraphRef.position, 2000);
     break;
     
@@ -318,6 +318,10 @@ public void keyReleased() {
     case'Z':
     case'z':
       showSize = !showSize;
+    break;
+    case'O':
+    case'o':
+      doSound = !doSound;
     break;
     case'R':
       graphs.clear();
@@ -441,7 +445,7 @@ void mouseClicked() {
   if (overMouseNodeRef != activeNodeRef) {
     activeNodeRef = overMouseNodeRef;
     // speaker.speak(activeNodeRef.label);
-    thread("speakNodeLabel");
+    if (doSound) thread("speakNodeLabel");
     lookAtPV(PVector.add(activeGraphRef.position, activeNodeRef.position), 300);
   }
 }
