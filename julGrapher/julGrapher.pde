@@ -226,6 +226,11 @@ public void draw() {
     background(255,255,0);
   }
   
+  strokeWeight(1);
+  stroke(colorActiveNode);  
+  line(mouseX, 0, mouseX, height);
+  line(0, mouseY, width, mouseY);
+  
 }
 
 
