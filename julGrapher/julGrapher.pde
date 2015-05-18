@@ -24,6 +24,7 @@ ArrayList<Graph> graphs = new ArrayList<Graph>();
 ArrayList<Label> labelsNode = new ArrayList<Label>();
 ArrayList<Label> labelsGraph = new ArrayList<Label>();
 Graph activeGraphRef;
+Graph activeGraphOri;
 Node activeNodeRef;
 Node overMouseNodeRef;
 int activeGraph = 0;
@@ -70,7 +71,7 @@ public void setup(){
     // tts.setPitchRange( 2000 )
     // tts.setPitchShift( 2 )
     
-    size(1920, 1080, P3D);
+    size(displayWidth, displayHeight, P3D);
     background(190);
     smooth();
     stroke(200);
@@ -79,6 +80,7 @@ public void setup(){
     // fogLine = loadShader("FogLine.frag", "FogLine.vert");
     loadData();
     activeGraphRef = graphs.get(activeGraph);
+    activeGraphOri = graphs.get(activeGraph);  
     lookAtPV(activeGraphRef.position, 2000);
     
     // controlP5 = new ControlP5(this);
@@ -457,15 +459,15 @@ void mouseClicked() {
   }
 }
 
-// void mousePressed(){
-//   if(mouseButton==LEFT){
-//      if(mouseEvent.getClickCount()==2){
-//         lookAtPV(graphs.get(activeGraph).position, 1800);
-//         activeNodeRef=null;
-//         // activeGraphRef = activeGraphOri;
-//     }
-//   }
-// }
+void mousePressed(){
+  if(mouseButton==LEFT){
+     if(mouseEvent.getClickCount()==2){
+        activeNodeRef=null;
+        activeGraphRef = activeGraphOri;
+        lookAtPV(activeGraphRef.position, 2000);
+    }
+  }
+}
 
 
 boolean isNearNode(Node nProbe, Node nSearch, int deep) {
