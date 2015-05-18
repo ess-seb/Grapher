@@ -72,7 +72,7 @@ public class Graph {
       this.nodes.get(source).addEdge(myEdge);
       this.nodes.get(target).addEdge(myEdge);
     }
-    println("LOADING COMPLETE");
+    // println("LOADING COMPLETE");
   }
   
 }

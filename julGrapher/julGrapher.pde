@@ -89,7 +89,6 @@ public void setup(){
     // controlP5.addToggle("doFog", false, 0, 150, 24, 12)
     //  .setGroup(g1);
     // controlP5.hide();
-    
      
 }
   
@@ -124,9 +123,7 @@ public void draw() {
                                0, 0, activeGraphRef.name, color(255), 48, fontGraphLabel));
   }
   hudBack();
-  
   for(Graph graph: graphs){
-
     pushMatrix();
     translate(graph.position.x, graph.position.y, graph.position.z);
     // hint(DISABLE_DEPTH_TEST);
@@ -223,6 +220,7 @@ public void draw() {
     popMatrix();
     hudFront();
   }
+  
   if (record) { 
     endRaw();
     record = false;
