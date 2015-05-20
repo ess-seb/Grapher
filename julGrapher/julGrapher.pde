@@ -89,6 +89,7 @@ public void setup(){
     // controlP5.addToggle("doFog", false, 0, 150, 24, 12)
     //  .setGroup(g1);
     // controlP5.hide();
+    println("LOADED \nGraphs: " + graphs.size());
      
 }
   
@@ -285,11 +286,11 @@ public void keyReleased() {
     case'p':
        record = true;
        saveFrame("screenshot-###.png");
-       
     break;
     
     case'X':
     case'x':
+     activeNodeRef = null;
      lookAtPV(graphs.get(activeGraph).position, 1800);
     break;
     case'G':
