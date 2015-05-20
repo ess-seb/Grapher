@@ -449,12 +449,17 @@ boolean loadData(){
 }
 
 void mouseClicked() {
-  println(overMouseNodeRef);
-  if (overMouseNodeRef != activeNodeRef) {
-    activeNodeRef = overMouseNodeRef;
-    // speaker.speak(activeNodeRef.label);
-    if (doSound) thread("speakNodeLabel");
-    lookAtPV(PVector.add(activeGraphRef.position, activeNodeRef.position), 300);
+  if (overMouseNodeRef != null){
+    // println(overMouseNodeRef);
+    if (overMouseNodeRef != activeNodeRef) {
+      activeNodeRef = overMouseNodeRef;
+      if (doSound) thread("speakNodeLabel");
+      lookAtPV(PVector.add(activeGraphRef.position, activeNodeRef.position), 300);
+      overMouseNodeRef = null;
+    }
+    else if (overMouseNodeRef == activeNodeRef) {
+      activeNodeRef = null;
+    }
   }
 }
 
