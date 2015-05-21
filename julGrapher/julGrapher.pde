@@ -45,6 +45,7 @@ color colorHL = color(255, 204, 153);
 
 PShader fog;
 PShader fogLine;
+PShape logoSVG;
 
 ControlP5 controlP5;
 boolean showPanel = false, doFog = false, showGraphLabels = true, showNodeLabels = true, showColors = false;
@@ -53,14 +54,17 @@ boolean showSize = true, doSound = false;
 static final int COLOR_ACTIVE_GROUP = 0, COLOR_FROM_FILE = 1, COLOR_NEAR_ONES = 2;
 int viewMode = COLOR_ACTIVE_GROUP;
 
+boolean isDataLoaded = false;
+int loadingAllSteps = 0, loadingStep = 0, multiGraph = 1;
 //colorModes: colorActiveGroup, colorFromFile, colorNearOnes
 
 public void setup(){
     noCursor();
     fontGraphLabel = loadFont("Klavika-Medium-70.vlw");
     fontNodeLabel = loadFont("Klavika-Regular-70.vlw");
+    logoSVG = loadShape("logo-01.svg");
     frameRate(24);
-    noLoop();
+    // noLoop();
     hint(ENABLE_STROKE_PURE);
     cam = new PeasyCam(this, 1000);
     cam.setWheelScale(2.0);
@@ -78,10 +82,8 @@ public void setup(){
     
     // fog = loadShader("Fog.frag", "Fog.vert");
     // fogLine = loadShader("FogLine.frag", "FogLine.vert");
-    loadData();
-    activeGraphRef = graphs.get(activeGraph);
-    activeGraphOri = graphs.get(activeGraph);  
-    lookAtPV(activeGraphRef.position, 2000);
+    
+    
     
     // controlP5 = new ControlP5(this);
     // controlP5.setAutoDraw(false);
@@ -90,144 +92,150 @@ public void setup(){
     //  .setGroup(g1);
     // controlP5.hide();
     println("LOADED \nGraphs: " + graphs.size());
-     
+    thread("loadData");
 }
   
   
 public void draw() {
-  if (record) {
-   // beginRaw(DXF, "raw-####.dxf");
-   beginRaw(PDF, "frame-###.pdf");
-  }
-  
-  background(179);
-  
-  fill(255);
-  // if (doFog) { 
-  //   shader(fog, TRIANGLES);
-  //   shader(fogLine, LINES);
-  //   noLights();
-  // } else {
-  //   resetShader(TRIANGLES);
-  //   resetShader(LINES); 
-  // }
-  
+    if (!isDataLoaded) {
+        introScreen();
+      }
+    
 
-  
-  if (activeGraphRef != null) {
-      pointerV.x = screenX(activeGraphRef.position.x, activeGraphRef.position.y, activeGraphRef.position.z);
-      pointerV.y = screenY(activeGraphRef.position.x, activeGraphRef.position.y, activeGraphRef.position.z);
-  }
-  if (activeGraphRef != null && showGraphLabels) {
-      labelsGraph.add(new Label(screenX(activeGraphRef.position.x, activeGraphRef.position.y, activeGraphRef.position.z),
-                               screenY(activeGraphRef.position.x, activeGraphRef.position.y, activeGraphRef.position.z),
-                               0, 0, activeGraphRef.name, color(255), 48, fontGraphLabel));
-  }
-  hudBack();
-  for(Graph graph: graphs){
-    pushMatrix();
-    translate(graph.position.x, graph.position.y, graph.position.z);
-    // hint(DISABLE_DEPTH_TEST);
-    for(Integer id: graph.nodes.keySet()) {
-      Node n = null;
-      n = graph.nodes.get(id);
-      
-      float size = 0;
-      if (!showSize) {
-        for(Edge e: n.edgesFromThis) {
-          size += e.weight;
-        }
-        for(Edge e: n.edgesToThis) {
-          size += e.weight;
-        }
-        size = map(size, 0, 50, 10, 50);
-      } else {
-        size = map(n.size, 0, 100, 10, 50);
-      }
-      
-      color txtColor = color(255);
-      // int size = n.edgesFromThis.size() + n.edgesToThis.size();
-      if (dist(screenX(n.position.x, n.position.y, n.position.z),
-               screenY(n.position.x, n.position.y, n.position.z),
-               mouseX, mouseY) < 6 && activeGraphRef == graph){
-        fill(colorHlActive);
-        txtColor = color(0);
-        overMouseNodeRef = n;
-      } else {
-        
-        switch (viewMode) {
-          case COLOR_FROM_FILE:
-            fill(n.colour);
-            txtColor = color(255); 
-          break;
-          
-          case COLOR_NEAR_ONES:
-            fill(colorNodes);
-            txtColor = color(255);
-            if (activeNodeRef != null && activeGraphRef == graph) {
-              if (isNearNode(n, activeNodeRef, 1) && n != activeNodeRef){
-                fill(colorConnNodes);
-                txtColor = color(0);
-              }
-              else if (n == activeNodeRef) 
-              {
-               txtColor = color(0); 
-               fill(colorActiveNode);
-              }
-            }
-          break;
-          
-          case COLOR_ACTIVE_GROUP:
-            fill(colorNodes);
-            if (activeNodeRef != null) {
-              if (activeNodeRef.colour == n.colour && activeGraphRef == graph){
-                fill(colorConnNodes);
-                txtColor = color(0);
-              }
-              if (n == activeNodeRef&& activeGraphRef == graph){
-                fill(colorActiveNode);
-                txtColor = color(0);
-              }
-            }
-          break;
-          
-        }
-      }
-      
-      if (activeGraphRef == graph && showNodeLabels){
-        labelsNode.add(new Label(screenX(n.position.x, n.position.y, n.position.z),
-                                 screenY(n.position.x, n.position.y, n.position.z),
-                                 0, 0, n.label, txtColor, 20, fontNodeLabel));
-      }
-      
-      pushMatrix();
-      translate(n.position.x, n.position.y, n.position.z);
-      
-      noStroke();
-      box(size);
-      
-      
-      popMatrix();
-      
-      for(Edge edgeFrom: n.edgesFromThis){
-        strokeWeight(map(edgeFrom.weight, 0, 13, 1, 8));
-        stroke(colorEdges, map(edgeFrom.weight, 0, 11, 20, 255));  
-        line(n.position.x, n.position.y, n.position.z,
-             edgeFrom.target.position.x, edgeFrom.target.position.y, edgeFrom.target.position.z);
-      }
-      
-      
+    if (isDataLoaded){
+    if (record) {
+     // beginRaw(DXF, "raw-####.dxf");
+     beginRaw(PDF, "frame-###.pdf");
     }
-    popMatrix();
-    hudFront();
-  }
+    
+    background(179);
+    
+    fill(255);
+    // if (doFog) { 
+    //   shader(fog, TRIANGLES);
+    //   shader(fogLine, LINES);
+    //   noLights();
+    // } else {
+    //   resetShader(TRIANGLES);
+    //   resetShader(LINES); 
+    // }
+    
   
-  if (record) { 
-    endRaw();
-    record = false;
-    background(255,255,0);
-  }
-  
+    
+    if (activeGraphRef != null) {
+        pointerV.x = screenX(activeGraphRef.position.x, activeGraphRef.position.y, activeGraphRef.position.z);
+        pointerV.y = screenY(activeGraphRef.position.x, activeGraphRef.position.y, activeGraphRef.position.z);
+    }
+    if (activeGraphRef != null && showGraphLabels) {
+        labelsGraph.add(new Label(screenX(activeGraphRef.position.x, activeGraphRef.position.y, activeGraphRef.position.z),
+                                 screenY(activeGraphRef.position.x, activeGraphRef.position.y, activeGraphRef.position.z),
+                                 0, 0, activeGraphRef.name, color(255), 48, fontGraphLabel));
+    }
+    hudBack();
+    for(Graph graph: graphs){
+      pushMatrix();
+      translate(graph.position.x, graph.position.y, graph.position.z);
+      // hint(DISABLE_DEPTH_TEST);
+      for(Integer id: graph.nodes.keySet()) {
+        Node n = null;
+        n = graph.nodes.get(id);
+        
+        float size = 0;
+        if (!showSize) {
+          for(Edge e: n.edgesFromThis) {
+            size += e.weight;
+          }
+          for(Edge e: n.edgesToThis) {
+            size += e.weight;
+          }
+          size = map(size, 0, 50, 10, 50);
+        } else {
+          size = map(n.size, 0, 100, 10, 50);
+        }
+        
+        color txtColor = color(255);
+        // int size = n.edgesFromThis.size() + n.edgesToThis.size();
+        if (dist(screenX(n.position.x, n.position.y, n.position.z),
+                 screenY(n.position.x, n.position.y, n.position.z),
+                 mouseX, mouseY) < 6 && activeGraphRef == graph){
+          fill(colorHlActive);
+          txtColor = color(0);
+          overMouseNodeRef = n;
+        } else {
+          
+          switch (viewMode) {
+            case COLOR_FROM_FILE:
+              fill(n.colour);
+              txtColor = color(255); 
+            break;
+            
+            case COLOR_NEAR_ONES:
+              fill(colorNodes);
+              txtColor = color(255);
+              if (activeNodeRef != null && activeGraphRef == graph) {
+                if (isNearNode(n, activeNodeRef, 1) && n != activeNodeRef){
+                  fill(colorConnNodes);
+                  txtColor = color(0);
+                }
+                else if (n == activeNodeRef) 
+                {
+                 txtColor = color(0); 
+                 fill(colorActiveNode);
+                }
+              }
+            break;
+            
+            case COLOR_ACTIVE_GROUP:
+              fill(colorNodes);
+              if (activeNodeRef != null) {
+                if (activeNodeRef.colour == n.colour && activeGraphRef == graph){
+                  fill(colorConnNodes);
+                  txtColor = color(0);
+                }
+                if (n == activeNodeRef&& activeGraphRef == graph){
+                  fill(colorActiveNode);
+                  txtColor = color(0);
+                }
+              }
+            break;
+            
+          }
+        }
+        
+        if (activeGraphRef == graph && showNodeLabels){
+          labelsNode.add(new Label(screenX(n.position.x, n.position.y, n.position.z),
+                                   screenY(n.position.x, n.position.y, n.position.z),
+                                   0, 0, n.label, txtColor, 20, fontNodeLabel));
+        }
+        
+        pushMatrix();
+        translate(n.position.x, n.position.y, n.position.z);
+        
+        noStroke();
+        box(size);
+        
+        
+        popMatrix();
+        
+        for(Edge edgeFrom: n.edgesFromThis){
+          strokeWeight(map(edgeFrom.weight, 0, 13, 1, 8));
+          stroke(colorEdges, map(edgeFrom.weight, 0, 11, 20, 255));  
+          line(n.position.x, n.position.y, n.position.z,
+               edgeFrom.target.position.x, edgeFrom.target.position.y, edgeFrom.target.position.z);
+        }
+        
+        
+      }
+      popMatrix();
+      hudFront();
+    }
+    
+    if (record) { 
+      endRaw();
+      record = false;
+      background(255,255,0);
+    }
+  }    
 
   
 }
@@ -327,11 +335,15 @@ public void keyReleased() {
     case'o':
       doSound = !doSound;
     break;
+    case'r':
+      graphs.clear();
+      multiGraph = 1;
+      thread("loadData");
+    break;
     case'R':
       graphs.clear();
-      loadData();
-      activeGraphRef = graphs.get(activeGraph);
-      lookAtPV(activeGraphRef.position, 2000);
+      multiGraph++;
+      thread("loadData");
     break;
   }
   
@@ -401,7 +413,6 @@ void hudFront() {
   line(mouseX, 0, mouseX, height);
   line(0, mouseY, width, mouseY);
   cam.endHUD();
-
 }
 
 
@@ -426,12 +437,13 @@ void delay(int delay)
 }
 
 boolean loadData(){
-  for (int ig=0; ig<1; ig++){
-      
-      XML xmlConfigs = loadXML("config.xml");
-      
+  loadingAllSteps = 0;
+  loadingStep = 0;
+  isDataLoaded = false;
+  XML xmlConfigs = loadXML("config.xml");
+  loadingAllSteps = xmlConfigs.getChildren("graph").length * multiGraph;
+  for (int ig=0; ig<multiGraph; ig++){
       for(XML graphConfig: xmlConfigs.getChildren("graph")){
-        
         XML xmlGraph = loadXML(graphConfig.getChild("file").getString("path"));
         Graph newGraph = new Graph(xmlGraph);
         graphs.add(newGraph);
@@ -442,9 +454,15 @@ boolean loadData(){
         newGraph.age = graphConfig.getChild("person").getString("age");
         newGraph.country = graphConfig.getChild("person").getString("country");
         newGraph.desc = graphConfig.getContent();
+        loadingStep++;
+        // delay(15);
       }
     }
-    loop();
+    activeGraphRef = graphs.get(activeGraph);
+    activeGraphOri = graphs.get(activeGraph);  
+    lookAtPV(activeGraphRef.position, 2000);
+    
+    isDataLoaded = true;
     return true;
 }
 
@@ -517,4 +535,20 @@ void speakNodeLabel(){
 
 void speakGraphLabel(){
   tts.speak(activeGraphRef.name);
+}
+
+void introScreen(){
+  background(179);
+  hint(DISABLE_DEPTH_TEST);
+  cam.beginHUD();
+    noStroke();
+    noFill();
+    shape(logoSVG, width/2-192/2, height/2-240/2, 192, 244);
+    stroke(124);
+    line(width/2-150, height/2+220, width/2+150, height/2+220);
+    stroke(255);
+    line(width/2-150, height/2+220, width/2-150+map(loadingStep, 0, loadingAllSteps, 0, 300), height/2+220);
+  hint(ENABLE_DEPTH_TEST);
+  cam.endHUD();
+  // introScreen();
 }
